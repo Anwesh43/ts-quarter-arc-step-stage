@@ -1,5 +1,6 @@
 const w : number = window.innerWidth, h : number = window.innerHeight
 const nodes : number = 5
+const arcs : number = 4
 const scGap : number = 0.05
 const scDiv : number = 0.51
 const strokeFactor : number = 90
@@ -25,6 +26,44 @@ const updateScale : Function = (scale : number, dir : number, a : number, b : nu
     return mirrorValue(scale, a, b) * dir * scGap
 }
 
+const drawQASNode : Function = (context : CanvasRenderingContext2D, i : number, scale : number) => {
+    const gap : number = w / (nodes + 1)
+    const sc1 : number = divideScale(scale, 0, 2)
+    const sc2 : number = divideScale(scale, 1, 2)
+    const size : number = gap / sizeFactor
+    const cGap : number = size * Math.PI/4
+    context.save()
+    context.translate(gap * (i + 1), h/2)
+    context.rotate(Math.PI/2 * sc2)
+    context.translate(-size, 0)
+    for(var j = 0; j < 2; j++) {
+        const scj : number = divideScale(sc1, j, 2)
+        context.save()
+        context.scale(1 - 2 * j, 1 - 2 * j)
+        context.translate(0, cGap)
+        for (var k = 0; k < arcs; k++) {
+            const sck : number = divideScale(scj, k, arcs)
+            const startDeg : number = 225
+            const endDeg : number = 225 + 90 * sck
+            context.save()
+            context.translate(size + 2 * cGap, 0)
+            for (var t = startDeg; t <= endDeg; t++) {
+                const x : number = size * Math.cos(t * Math.PI/180)
+                const y : number = size * Math.sin(t * Math.PI/180)
+                if (t == startDeg) {
+                    context.beginPath()
+                    context.moveTo(x, y)
+                } else {
+                    context.lineTo(x, y)
+                }
+            }
+            context.stroke()
+            context.restore()
+        }
+        context.restore()
+    }
+    context.restore()
+}
 class QuarterArcStepStage {
     canvas : HTMLCanvasElement = document.createElement('canvas')
     context : CanvasRenderingContext2D
