@@ -4,7 +4,7 @@ const arcs : number = 4
 const scGap : number = 0.05
 const scDiv : number = 0.51
 const strokeFactor : number = 90
-const sizeFactor : number = 2.7
+const sizeFactor : number = 2.1
 const color : string = "#43A047"
 
 const maxScale : Function = (scale : number, i : number, n : number) : number => {
@@ -30,28 +30,32 @@ const drawQASNode : Function = (context : CanvasRenderingContext2D, i : number, 
     const gap : number = w / (nodes + 1)
     const sc1 : number = divideScale(scale, 0, 2)
     const sc2 : number = divideScale(scale, 1, 2)
-    const size : number = gap / sizeFactor
+    const totalSize : number = gap / sizeFactor
+    const size : number = totalSize / arcs
     const cGap : number = size * Math.PI/4
+    context.lineWidth = Math.min(w, h) / strokeFactor
+    context.lineCap = 'round'
+    context.strokeStyle = color
     context.save()
     context.translate(gap * (i + 1), h/2)
     context.rotate(Math.PI/2 * sc2)
-    context.translate(-size, 0)
     for(var j = 0; j < 2; j++) {
+        const sf : number = 1 - 2 * j
         const scj : number = divideScale(sc1, j, 2)
         context.save()
-        context.scale(1 - 2 * j, 1 - 2 * j)
-        context.translate(0, cGap)
+        context.scale(sf, sf)
+        context.translate(-cGap * 4,  cGap)
         for (var k = 0; k < arcs; k++) {
             const sck : number = divideScale(scj, k, arcs)
             const startDeg : number = 225
             const endDeg : number = 225 + 90 * sck
             context.save()
-            context.translate(size + 2 * cGap, 0)
+            context.translate(cGap + 2 * cGap * k, 0)
+            context.beginPath()
             for (var t = startDeg; t <= endDeg; t++) {
                 const x : number = size * Math.cos(t * Math.PI/180)
                 const y : number = size * Math.sin(t * Math.PI/180)
                 if (t == startDeg) {
-                    context.beginPath()
                     context.moveTo(x, y)
                 } else {
                     context.lineTo(x, y)
@@ -104,7 +108,8 @@ class State {
     prevScale : number = 0
 
     update(cb : Function) {
-        this.scale += updateScale(this.scale, arcs * 2, 1)
+        this.scale += updateScale(this.scale, this.dir, arcs * 2, 1)
+        console.log(this.scale)
         if (Math.abs(this.scale - this.prevScale) > 1) {
             this.scale = this.prevScale + this.dir
             this.dir = 0
