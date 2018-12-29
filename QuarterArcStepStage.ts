@@ -200,3 +200,24 @@ class QuarterArcStep {
         this.curr.startUpdating(cb)
     }
 }
+
+class Renderer {
+    qas : QuarterArcStep = new QuarterArcStep()
+    animator : Animator = new Animator()
+
+    render(context : CanvasRenderingContext2D) {
+        this.qas.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.qas.startUpdating(() => {
+            this.animator.start(() => {
+                cb()
+                this.qas.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
+            })
+        })
+    }
+}
